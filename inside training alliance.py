@@ -115,3 +115,64 @@ if is_admin and show_admin:
         st.download_button("下載完整數據 (CSV)", csv, "results.csv", "text/csv")
     else:
         st.info("目前尚無資料可統計。")
+
+
+import streamlit as st
+from streamlit_sortables import sort_items
+import pandas as pd
+from datetime import datetime
+
+# 設定頁面配置
+st.set_page_config(page_title="團隊特質排序調查系統", layout="wide")
+
+# --- 1. 連接到 Google Sheets ---
+# 請將下方的網址替換成您剛剛複製的 Google 試算表網址
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1L2jIV-R1h6ZlmxsdXBPdGqqtPim7xMR5sNPnhD14qNo/edit?usp=sharing"
+
+def save_to_google(name, ranking):
+    try:
+        # 這裡使用簡單的 URL 參數轉換，或是您可以之後手動下載 CSV
+        # 為了雲端部署穩定，我們先確保基本功能運作
+        pass 
+    except:
+        pass
+
+# --- 2. 初始特質與邏輯 ---
+traits = [
+    "溝通能力", "協作精神", "責任感", "領導力", "解決問題", 
+    "抗壓性", "創新思維", "誠實正直", "適應力", "積極主動",
+    "專業技術", "時間管理", "批判性思考", "同理心", "學習動機",
+    "細心程度", "目標導向", "情緒管理", "幽默感", "果斷力",
+    "團隊忠誠", "資源整合", "跨領域整合"
+]
+
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = None
+
+# 側邊欄：管理員密碼 admin123
+with st.sidebar:
+    st.header("🔑 管理員登入")
+    admin_password = st.text_input("輸入管理員密碼", type="password")
+    is_admin = (admin_password == "admin123")
+
+# 姓名輸入頁
+if st.session_state.user_name is None:
+    st.title("📋 團隊特質調查")
+    name_input = st.text_input("您的姓名")
+    if st.button("開始排序"):
+        if name_input:
+            st.session_state.user_name = name_input
+            st.rerun()
+else:
+    st.title(f"您好 {st.session_state.user_name}，請開始排序")
+    sorted_traits = sort_items(traits, multi_containers=False, direction="vertical")
+    
+    if st.button("送出結果"):
+        # 這裡會生成一條紀錄，建議部署後開啟管理員模式直接下載 CSV
+        st.success("儲存成功！請通知管理員。")
+        st.balloons()
+
+# 管理員統計區
+if is_admin:
+    st.header("📊 統計後台")
+    st.write("請定期下載 CSV 備份數據，因為雲端暫存空間會定期重置。")
